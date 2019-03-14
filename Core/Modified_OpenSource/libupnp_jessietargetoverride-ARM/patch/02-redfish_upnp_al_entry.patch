@@ -1,0 +1,35 @@
+--- libupnp1/upnp/src/ssdp/ssdp_device.c	2017-04-18 17:58:54.474187091 -0400
++++ libupnp-new/upnp/src/ssdp/ssdp_device.c	2017-04-18 18:09:35.946191592 -0400
+@@ -339,8 +339,8 @@
+ {
+ 	int ret_code;
+ 	const char *nts;
++	char *ip_address = NULL;
+ 	membuffer buf;
+-
+ 	/* Notf == 0 means service shutdown,
+ 	 * Notf == 1 means service advertisement,
+ 	 * Notf == 2 means reply */
+@@ -380,16 +380,19 @@
+ 		} else {
+ #ifdef UPNP_HAVE_OPTSSDP
+ 			duration = 1800;
++			ip_address = UpnpGetServerIpAddress();
+ 			ret_code = http_MakeMessage(&buf, 1, 1,
+ 					    "R" "sdc" "D" "sc" "ssc" "ssc" "ssc"
+-					    "S" "Xc" "ssc" "sscc", HTTP_OK,
++					    "S" "Xc" "ssc" "ssssc" "sscc", HTTP_OK,
+ 					    "CACHE-CONTROL: max-age=", duration,
+ 					    "EXT:", "LOCATION: ", location,
+ 					    "OPT: ",
+ 					    "\"http://schemas.upnp.org/upnp/1/0/\"; ns=01",
+ 					    "01-NLS: ", gUpnpSdkNLSuuid,
+-					    X_USER_AGENT, "ST: ", nt, "USN: ",
+-					    usn);
++					    X_USER_AGENT, "ST: ", nt,
++					    /* AMI support redfish AL field. */
++					    "AL: ", "\"https://", ip_address, "/redfish/v1/\"",
++					    "USN: ", usn);
+ #else
+ 			ret_code = http_MakeMessage(&buf, 1, 1,
+ 					    "R" "sdc" "D" "sc" "ssc"

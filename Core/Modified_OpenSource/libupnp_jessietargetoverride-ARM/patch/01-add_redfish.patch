@@ -1,0 +1,41 @@
+--- libupnp_old/configure	Thu Jul  7 22:36:05 2016
++++ libupnp/configure	Mon Oct  3 16:00:44 2016
+@@ -13635,7 +13635,7 @@
+ echo "-------------------------------------------------------------------------------"
+ 
+ 
+-ac_config_files="$ac_config_files Makefile ixml/Makefile ixml/doc/Makefile threadutil/Makefile upnp/Makefile upnp/doc/Makefile upnp/sample/Makefile docs/dist/Makefile libupnp.pc"
++ac_config_files="$ac_config_files Makefile ixml/Makefile ixml/doc/Makefile threadutil/Makefile upnp/Makefile upnp/doc/Makefile docs/dist/Makefile libupnp.pc"
+ 
+ 
+ 
+@@ -14719,7 +14719,6 @@
+     "threadutil/Makefile") CONFIG_FILES="$CONFIG_FILES threadutil/Makefile" ;;
+     "upnp/Makefile") CONFIG_FILES="$CONFIG_FILES upnp/Makefile" ;;
+     "upnp/doc/Makefile") CONFIG_FILES="$CONFIG_FILES upnp/doc/Makefile" ;;
+-    "upnp/sample/Makefile") CONFIG_FILES="$CONFIG_FILES upnp/sample/Makefile" ;;
+     "docs/dist/Makefile") CONFIG_FILES="$CONFIG_FILES docs/dist/Makefile" ;;
+     "libupnp.pc") CONFIG_FILES="$CONFIG_FILES libupnp.pc" ;;
+ 
+--- libupnp_out/upnp/Makefile.in	Thu Jul  7 22:36:07 2016
++++ libupnp/upnp/Makefile.in	Mon Oct  3 16:01:35 2016
+@@ -661,7 +661,7 @@
+ top_build_prefix = @top_build_prefix@
+ top_builddir = @top_builddir@
+ top_srcdir = @top_srcdir@
+-SUBDIRS = doc . sample
++SUBDIRS = doc
+ AM_CPPFLAGS = \
+ 	-I$(srcdir)/inc \
+ 	-I$(top_srcdir)/threadutil/inc \
+ 	
+--- libupnp_out/upnp/src/ssdp/ssdp_device.c	Fri Jan  8 03:20:51 2016
++++ libupnp/upnp/src/ssdp/ssdp_device.c	Mon Oct  3 15:58:48 2016
+@@ -379,6 +379,7 @@
+ #endif /* UPNP_HAVE_OPTSSDP */
+ 		} else {
+ #ifdef UPNP_HAVE_OPTSSDP
++			duration = 1800;
+ 			ret_code = http_MakeMessage(&buf, 1, 1,
+ 					    "R" "sdc" "D" "sc" "ssc" "ssc" "ssc"
+ 					    "S" "Xc" "ssc" "sscc", HTTP_OK,

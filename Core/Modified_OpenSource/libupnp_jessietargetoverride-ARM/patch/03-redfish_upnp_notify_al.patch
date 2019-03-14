@@ -1,0 +1,35 @@
+diff -Naur libupnp-1.6.20_old/upnp/src/ssdp/ssdp_device.c libupnp-1.6.20_new/upnp/src/ssdp/ssdp_device.c
+--- libupnp-1.6.20_old/upnp/src/ssdp/ssdp_device.c	2017-05-08 16:37:54.874806492 -0400
++++ libupnp-1.6.20_new/upnp/src/ssdp/ssdp_device.c	2017-05-08 18:22:05.602964818 -0400
+@@ -185,7 +185,7 @@
+ 	int Index;
+ 	unsigned long replyAddr = inet_addr(gIF_IPV4);
+ 	/* a/c to UPNP Spec */
+-	int ttl = 4;
++	int ttl = 2;
+ #ifdef INET_IPV6
+ 	int hops = 1;
+ #endif
+@@ -459,10 +459,11 @@
+ 					    RegistrationState);
+ #endif /* UPNP_HAVE_OPTSSDP */
+ 		} else {
+-#ifdef UPNP_HAVE_OPTSSDP 
++#ifdef UPNP_HAVE_OPTSSDP
++			ip_address = UpnpGetServerIpAddress(); 
+ 			ret_code = http_MakeMessage(&buf, 1, 1,
+ 					    "Q" "sssdc" "sdc" "ssc" "ssc" "ssc"
+-					    "ssc" "ssc" "S" "Xc" "sscc",
++					    "ssc" "ssc" "S" "Xc" "ssssc" "sscc",
+ 					    HTTPMETHOD_NOTIFY, "*", (size_t) 1,
+ 					    "HOST: ", host, ":", SSDP_PORT,
+ 					    "CACHE-CONTROL: max-age=", duration,
+@@ -470,6 +471,8 @@
+ 					    "\"http://schemas.upnp.org/upnp/1/0/\"; ns=01",
+ 					    "01-NLS: ", gUpnpSdkNLSuuid, "NT: ",
+ 					    nt, "NTS: ", nts, X_USER_AGENT,
++					    /* AMI support redfish AL field. */
++					    "AL: ", "\"https://", ip_address, "/redfish/v1/\"",
+ 					    "USN: ", usn);
+ #else
+ 			ret_code = http_MakeMessage(&buf, 1, 1,

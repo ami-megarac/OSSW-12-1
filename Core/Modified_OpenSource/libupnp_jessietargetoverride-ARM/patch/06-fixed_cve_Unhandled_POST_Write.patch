@@ -1,0 +1,84 @@
+diff -Naur libupnp_old/configure.ac libupnp_new/configure.ac
+--- libupnp_old/configure.ac	2018-12-21 10:03:23.181125656 +0800
++++ libupnp_new/configure.ac	2018-12-21 10:04:39.616276526 +0800
+@@ -491,6 +491,10 @@
+         AC_DEFINE(UPNP_ENABLE_BLOCKING_TCP_CONNECTIONS, 1, [see upnpconfig.h])
+ fi
+ 
++RT_BOOL_ARG_ENABLE([postwrite], [no], [write to the filesystem on otherwise unhandled POST requests])
++if test "x$enable_postwrite" = xyes ; then
++        AC_DEFINE(UPNP_ENABLE_POST_WRITE, 1, [see upnpconfig.h])
++fi
+ 
+ RT_BOOL_ARG_ENABLE([samples], [yes], [compilation of upnp/sample/ code])
+ 
+diff -Naur libupnp_old/upnp/inc/upnpconfig.h.in libupnp_new/upnp/inc/upnpconfig.h.in
+--- libupnp_old/upnp/inc/upnpconfig.h.in	2018-12-21 10:05:16.315001649 +0800
++++ libupnp_new/upnp/inc/upnpconfig.h.in	2018-12-21 10:06:37.692228814 +0800
+@@ -131,5 +131,9 @@
+  * header (i.e. configure --enable-unspecified_server) */
+ #undef UPNP_ENABLE_UNSPECIFIED_SERVER
+ 
++/** Defined to 1 if the library has been compiled to support filesystem writes on POST
++ *  (i.e. configure --enable-postwrite) */
++#undef UPNP_ENABLE_POST_WRITE
++
+ #endif /* UPNP_CONFIG_H */
+ 
+diff -Naur libupnp_old/upnp/src/gena/gena_device.c libupnp_new/upnp/src/gena/gena_device.c
+--- libupnp_old/upnp/src/gena/gena_device.c	2018-12-17 14:38:34.540243220 +0800
++++ libupnp_new/upnp/src/gena/gena_device.c	2018-12-17 14:40:21.094404264 +0800
+@@ -1113,7 +1113,7 @@
+ 	/*! [out] . */
+ 	URL_list *out)
+ {
+-    size_t URLcount = 0;
++    size_t URLcount = 0, URLcount2 = 0;
+     size_t i;
+     int return_code = 0;
+     uri_type temp;
+@@ -1155,16 +1155,23 @@
+         }
+         memcpy( out->URLs, URLS->buff, URLS->size );
+         out->URLs[URLS->size] = 0;
+-        URLcount = 0;
+         for( i = 0; i < URLS->size; i++ ) {
+             if( ( URLS->buff[i] == '<' ) && ( i + 1 < URLS->size ) ) {
+                 if( ( ( return_code =
+                         parse_uri( &out->URLs[i + 1], URLS->size - i + 1,
+-                                   &out->parsedURLs[URLcount] ) ) ==
++                                   &out->parsedURLs[URLcount2] ) ) ==
+                       HTTP_SUCCESS )
+-                    && ( out->parsedURLs[URLcount].hostport.text.size !=
++                    && ( out->parsedURLs[URLcount2].hostport.text.size !=
+                          0 ) ) {
+-                    URLcount++;
++                    URLcount2++;
++                    if (URLcount2 >= URLcount)
++                        /*
++                         * break early here in case there is a bogus URL that
++                         * was skipped above. This prevents to access
++                         * out->parsedURLs[URLcount] which is beyond the
++                         * allocation.
++                         */
++                        break;
+                 } else {
+                     if( return_code == UPNP_E_OUTOF_MEMORY ) {
+                         free( out->URLs );
+diff -Naur libupnp_old/upnp/src/genlib/net/http/webserver.c libupnp_new/upnp/src/genlib/net/http/webserver.c
+--- libupnp_old/upnp/src/genlib/net/http/webserver.c	2018-12-21 10:05:24.218573335 +0800
++++ libupnp_new/upnp/src/genlib/net/http/webserver.c	2018-12-21 10:08:10.155175695 +0800
+@@ -1367,9 +1367,13 @@
+ 		if (Fp == NULL)
+ 			return HTTP_INTERNAL_SERVER_ERROR;
+ 	} else {
++#ifdef UPNP_ENABLE_POST_WRITE		
+ 		Fp = fopen(filename, "wb");
+ 		if (Fp == NULL)
+ 			return HTTP_UNAUTHORIZED;
++#else
++		return HTTP_NOT_FOUND;
++#endif		
+ 	}
+ 	parser->position = POS_ENTITY;
+ 	do {

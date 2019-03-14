@@ -1,0 +1,11 @@
+# see git-dpm(1) from git-dpm package
+dee21e97428e69d30e2d15c71f3e7cc08bf8e4f8
+dee21e97428e69d30e2d15c71f3e7cc08bf8e4f8
+3d246f10429fc9a37b98eabef94fe8dc7c61002b
+3d246f10429fc9a37b98eabef94fe8dc7c61002b
+openssh_7.9p1.orig.tar.gz
+993aceedea8ecabb1d0dd7293508a361891c4eaa
+1565384
+debianTag="debian/%e%%%V"
+patchedTag="patched/%e%%%V"
+upstreamTag="upstream/%U"

@@ -1,0 +1,3 @@
+libupnp is configured using option:
+./configure  --disable-client
+

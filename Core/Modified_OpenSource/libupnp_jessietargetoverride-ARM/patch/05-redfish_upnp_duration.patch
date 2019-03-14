@@ -1,0 +1,11 @@
+diff -Naur libupnp_old/upnp/src/ssdp/ssdp_device.c libupnp_new/upnp/src/ssdp/ssdp_device.c
+--- libupnp_old/upnp/src/ssdp/ssdp_device.c	2017-06-06 15:30:49.530793082 +0800
++++ libupnp_new/upnp/src/ssdp/ssdp_device.c	2017-06-06 15:32:19.633660335 +0800
+@@ -460,6 +460,7 @@
+ #endif /* UPNP_HAVE_OPTSSDP */
+ 		} else {
+ #ifdef UPNP_HAVE_OPTSSDP
++			duration = 1800;
+ 			ip_address = UpnpGetServerIpAddress(); 
+ 			ret_code = http_MakeMessage(&buf, 1, 1,
+ 					    "Q" "sssdc" "sdc" "ssc" "ssc" "ssc"
